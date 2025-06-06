@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scalable WebSocket Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div id="login-screen">
+            <h1>WebSocket Chat</h1>
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Enter your username" required>
+                <button id="login-button">Connect</button>
+            </div>
+        </div>
+        
+        <div id="chat-screen" style="display: none;">
+            <div class="header">
+                <h2>WebSocket Chat</h2>
+                <div class="server-info">
+                    <span id="server-id"></span>
+                    <span id="connection-count"></span>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <!-- Sidebar with chat list -->
+                <div class="sidebar">
+                    <div class="chat-selection">
+                        <div class="chat-option active" data-chat="public">
+                            <i class="fas fa-users"></i>
+                            <span>Public Chat</span>
+                        </div>
+                    </div>
+                    
+                    <div class="users-section">
+                        <h3>Direct Messages</h3>
+                        <div id="users-list" class="users-list">
+                            <!-- Users will be listed here as chat options -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat area -->
+                <div class="chat-area">
+                    <div class="chat-header">
+                        <h3 id="current-chat-title">Public Chat</h3>
+                    </div>
+                    
+                    <div id="chat-messages" class="chat-messages">
+                        <!-- Messages will be displayed here -->
+                    </div>
+                    
+                    <div class="message-input">
+                        <input type="text" id="message-input" placeholder="Type your message...">
+                        <button id="send-button"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/main.js"></script>
+</body>
+</html>

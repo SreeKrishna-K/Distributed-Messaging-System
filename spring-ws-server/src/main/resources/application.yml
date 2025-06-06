@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: spring-websocket-server
+  
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  
+  # Kafka Configuration
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    consumer:
+      auto-offset-reset: earliest
+      properties:
+        '[spring.json.trusted.packages]': com.example.messagingapp.model
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+# Custom Application Configuration
+# This property is used for server identification
+messaging:
+  server:
+    id: ${SERVER_ID:}
+
+# Server Configuration
+server:
+  port: ${PORT:8080}
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    '[com.example.messagingapp]': DEBUG
+    '[org.springframework.web.socket]': INFO

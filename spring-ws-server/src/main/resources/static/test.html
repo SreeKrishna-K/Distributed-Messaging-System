@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Boot WebSocket Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="login-screen">
+            <h1>Spring Boot WebSocket Chat</h1>
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Enter your username" required>
+                <button id="login-button">Connect</button>
+            </div>
+        </div>
+        
+        <div id="chat-screen" style="display: none;">
+            <div class="header">
+                <h2>Spring Boot WebSocket Chat</h2>
+                <div class="server-info">
+                    <span id="server-id"></span>
+                    <span id="connection-count"></span>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will be displayed here -->
+                </div>
+                
+                <div class="users-list">
+                    <h3>Connected Users</h3>
+                    <ul id="users-list">
+                        <!-- Users will be listed here -->
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="message-input">
+                <div class="recipient-selector">
+                    <select id="recipient-selector">
+                        <option value="">Everyone</option>
+                    </select>
+                </div>
+                <input type="text" id="message-input" placeholder="Type your message...">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+version: '3'
+
+services:
+  # Kafka message broker
+  kafka:
+    image: bitnami/kafka
+    container_name: kafka
+    ports:
+      - 9092:9092
+      - 29092:29092
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,INTERNAL://:29092,CONTROLLER://:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.224.1:9092,INTERNAL://kafka:29092
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@127.0.0.1:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - ./kafka:/bitnami/kafka
+    networks:
+      - websocket-network
+      
+  # Kafka UI management interface
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - 8090:8080
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_DESERIALIZATIONMETHOD: JACKSON
+      KAFKA_CLUSTERS_0_SERIALIZATIONMETHOD: JACKSON
+    depends_on:
+      - kafka
+    networks:
+      - websocket-network
+
+  # Redis for user tracking and session management
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - websocket-network
+
+  # Nginx load balancer
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - spring-ws-server1
+      - spring-ws-server2
+    networks:
+      - websocket-network
+
+  # Spring WebSocket Server 1
+  spring-ws-server1:
+    build:
+      context: ./spring-ws-server
+      dockerfile: Dockerfile
+    environment:
+      - SERVER_ID=server1
+      - PORT=8081
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - KAFKA_BROKERS=kafka:9092
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - websocket-network
+    depends_on:
+      - redis
+      - kafka
+
+  # Spring WebSocket Server 2
+  spring-ws-server2:
+    build:
+      context: ./spring-ws-server
+      dockerfile: Dockerfile
+    environment:
+      - SERVER_ID=server2
+      - PORT=8082
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - KAFKA_BROKERS=kafka:9092
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - websocket-network
+    depends_on:
+      - redis
+      - kafka
+
+networks:
+  websocket-network:
+    driver: bridge
+
+volumes:
+  redis-data:

@@ -1,0 +1,18 @@
+package com.example.messagingapp;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableAsync;
+
+import com.example.messagingapp.config.MessagingProperties;
+
+@SpringBootApplication
+@EnableConfigurationProperties(MessagingProperties.class)
+@EnableAsync
+public class MessagingApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MessagingApplication.class, args);
+    }
+}
