@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scalable WebSocket Chat</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/video-call.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -63,6 +64,70 @@
         </div>
     </div>
     
+    <!-- Video Call Modal -->
+    <div id="video-call-modal" class="video-call-modal">
+        <div class="video-call-header">
+            <div class="video-call-title">Video Call with <span id="call-with-user"></span></div>
+            <div class="video-call-status">
+                <span id="call-status">Connected</span>
+                <span class="call-duration" id="call-duration">00:00</span>
+            </div>
+        </div>
+        
+        <div class="video-grid">
+            <div id="remote-video-container" class="video-container remote">
+                <video id="remote-video" autoplay playsinline></video>
+                <div class="video-user-label" id="remote-user-label">Remote User</div>
+            </div>
+            
+            <div id="local-video-container" class="video-container local">
+                <video id="local-video" autoplay muted playsinline></video>
+                <div class="video-user-label">You</div>
+            </div>
+        </div>
+        
+        <div class="video-controls">
+            <button id="toggle-audio" class="control-button audio">
+                <i class="fas fa-microphone"></i>
+            </button>
+            
+            <button id="toggle-video" class="control-button video">
+                <i class="fas fa-video"></i>
+            </button>
+            
+            <button id="toggle-screen" class="control-button screen">
+                <i class="fas fa-desktop"></i>
+            </button>
+            
+            <button id="end-call" class="control-button hangup">
+                <i class="fas fa-phone-slash"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Incoming Call Dialog -->
+    <div id="incoming-call-dialog" class="call-dialog">
+        <div class="call-dialog-header">Incoming Video Call</div>
+        <div class="call-dialog-content">
+            <div class="caller-info">
+                <i class="fas fa-user-circle" style="font-size: 48px; margin-bottom: 10px;"></i>
+                <div><span id="caller-name">User</span> is calling you</div>
+            </div>
+            <div class="call-dialog-buttons">
+                <button id="accept-call" class="call-dialog-button accept-call">
+                    <i class="fas fa-phone"></i> Accept
+                </button>
+                <button id="decline-call" class="call-dialog-button decline-call">
+                    <i class="fas fa-phone-slash"></i> Decline
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Call Ringtone (using data URL instead of file) -->
+    <audio id="call-ringtone" loop src="data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAeAAAcmAAXFxcXIiIiIiIuLi4uLjo6Ojo6RUVFRVFRUVFRXV1dXV1oaGhoaHR0dHR0gICAgoKCgoKNjY2NjZmZmZmZpaWlpaWxsbGxsb29vb29ysrKysrW1tbW1uLi4uLi7u7u7u76+vr6+v////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAVCAAAAAAAAHJh1YbpFAAAAAAAAAAAAAAAAAAAA//tUZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/7UGQAAAAAAAGkAAAAIAAANIAAAAQAAAaQAAAAgAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//+xBkYA/wAABpAAAACAAADSAAAAEAAAGkAAAAIAAANIAAAARVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"></audio>
+    
     <script src="js/main.js"></script>
+    <script src="js/webrtc.js"></script>
 </body>
 </html>

@@ -22,6 +22,7 @@ import com.example.messagingapp.model.ChatMessage;
 import com.example.messagingapp.service.MessageService;
 import com.example.messagingapp.service.RedisService;
 import com.example.messagingapp.service.ServerProperties;
+import com.example.messagingapp.service.VideoCallService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -44,11 +45,14 @@ public class ChatWebSocketHandlerTest {
     @Mock
     private ObjectMapper objectMapper;
     
+    @Mock
+    private VideoCallService videoCallService;
+    
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         
-        chatWebSocketHandler = new ChatWebSocketHandler(objectMapper, messageService, redisService, serverProperties);
+        chatWebSocketHandler = new ChatWebSocketHandler(objectMapper, messageService, redisService, serverProperties, videoCallService);
         
         when(serverProperties.getServerId()).thenReturn("test-server-id");
         

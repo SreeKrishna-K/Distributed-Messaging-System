@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -15,9 +14,12 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import com.example.messagingapp.model.ChatMessage;
+import com.example.messagingapp.model.WebRTCSignal;
 import com.example.messagingapp.service.MessageService;
 import com.example.messagingapp.service.RedisService;
 import com.example.messagingapp.service.ServerProperties;
+import com.example.messagingapp.service.VideoCallService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,16 +40,19 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
     private final ServerProperties serverProperties;
     private final RedisService redisService;
     private final MessageService messageService;
+    private final VideoCallService videoCallService;
     private final ObjectMapper objectMapper;
     
     public ChatWebSocketHandler(ObjectMapper objectMapper, 
                                MessageService messageService,
                                RedisService redisService,
-                               ServerProperties serverProperties) {
+                               ServerProperties serverProperties,
+                               VideoCallService videoCallService) {
         this.objectMapper = objectMapper;
         this.messageService = messageService;
         this.redisService = redisService;
         this.serverProperties = serverProperties;
+        this.videoCallService = videoCallService;
     }
 
     @Override
@@ -109,6 +114,19 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         }
         
         try {
+            // First, try to parse as a WebRTC signal
+            try {
+                WebRTCSignal webRTCSignal = objectMapper.readValue(message.getPayload(), WebRTCSignal.class);
+                if (webRTCSignal.getType() != null && isValidWebRTCSignalType(webRTCSignal.getType())) {
+                    log.info("Received WebRTC signal from {} ({}): {}", userId, sessionId, webRTCSignal.getType());
+                    videoCallService.processSignal(webRTCSignal, userId, userSessionsMap);
+                    return;
+                }
+            } catch (JsonProcessingException e) {
+                // Not a WebRTC signal, continue with ChatMessage parsing
+            }
+            
+            // If not a WebRTC signal, treat as a normal chat message
             ChatMessage chatMessage = objectMapper.readValue(message.getPayload(), ChatMessage.class);
             log.info("Received message from {} ({}): {}", userId, sessionId, chatMessage);
             
@@ -315,5 +333,13 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
             // If no recipient specified, broadcast to everyone
             broadcast(message);
         }
+    }
+    
+    /**
+     * Check if the signal type is a valid WebRTC signal
+     */
+    private boolean isValidWebRTCSignalType(String type) {
+        return "offer".equals(type) || "answer".equals(type) || "ice-candidate".equals(type) || 
+               "call-request".equals(type) || "call-response".equals(type) || "call-end".equals(type);
     }
 }

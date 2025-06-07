@@ -31,10 +31,19 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Save username for later use
+        window.username = username;
+        
         // Create WebSocket connection with user ID as parameter
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = window.location.host;
-        socket = new WebSocket(`${protocol}//${host}/ws?X-Auth-User-Id=${encodeURIComponent(username)}`);
+        const wsUrl = `${protocol}//${host}/ws?X-Auth-User-Id=${encodeURIComponent(username)}`;
+        console.log('Connecting to WebSocket at:', wsUrl);
+        
+        // Create WebSocket connection
+        socket = new WebSocket(wsUrl);
+        // Make socket available globally for webrtc.js
+        window.socket = socket;
         
         // Store the actual username without encoding for display purposes
         window.displayUsername = username;
@@ -55,6 +64,17 @@ document.addEventListener('DOMContentLoaded', function() {
         socket.addEventListener('message', function(event) {
             const data = JSON.parse(event.data);
             console.log('Message from server:', data);
+            
+            // Check for WebRTC signals first
+            if (['call-request', 'call-response', 'offer', 'answer', 'ice-candidate', 'call-end'].includes(data.type)) {
+                // Handle WebRTC signal in webrtc.js
+                if (typeof handleWebRTCSignal === 'function') {
+                    handleWebRTCSignal(data);
+                } else {
+                    console.error('handleWebRTCSignal function not found');
+                }
+                return;
+            }
             
             switch(data.type) {
                 case 'info':
@@ -193,7 +213,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Handle regular chat message
                     if (data.message) {
                         const isSelf = data.userId === username;
-                        addChatMessage(data.message, data.userId, data.timestamp, isSelf);
+                        // Only add message to UI if it's not from current user (to avoid duplicates)
+                        // We already added self messages in the sendMessage function
+                        if (!isSelf) {
+                            addChatMessage(data.message, data.userId, data.timestamp, isSelf);
+                        }
                     }
             }
         });
@@ -489,6 +513,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         userElement.appendChild(avatar);
         userElement.appendChild(userInfo);
+        
+        // Add video call button
+        const callButton = document.createElement('button');
+        callButton.className = 'call-button';
+        callButton.innerHTML = '<i class="fas fa-video"></i>';
+        callButton.title = 'Start video call';
+        callButton.onclick = function(event) {
+            event.stopPropagation(); // Don't trigger chat switch
+            initiateCall(userId);
+        };
+        userElement.appendChild(callButton);
         
         // Add click event to switch chat
         userElement.addEventListener('click', function() {
